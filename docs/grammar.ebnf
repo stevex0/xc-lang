@@ -1,0 +1,270 @@
+(* Primitive Production Rules *)
+<letter> =
+    "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+    | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+    ;
+
+<decimal-digit> =
+    "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+    ;
+
+<non-zero-digit> =
+    "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+    ;
+
+<binary-digit> =
+    "0" | "1"
+    ;
+
+<octal-digit> =
+    "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7"
+    ;
+
+<hexadecimal-digit> =
+    "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+    | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F"
+    ;
+
+(* Tokens *)
+<identifier> =
+    ("_" | <letter>) ("_" | <letter> | <decimal-digit>)*
+    ;
+
+<number> =
+    <integer-literal>
+    | <float-literal>
+    ;
+
+<integer-literal> =
+    <decimal-literal>
+    | <binary-literal>
+    | <octal-literal>
+    | <hexadecimal-literal>
+    ;
+
+<decimal-literal> =
+    "0"
+    | <non-zero-digit> <decimal-digit>*
+    ;
+
+<binary-literal> =
+    "0b" <binary-digit>+
+    ;
+
+<octal-literal> =
+    "0o" <octal-digit>+
+    ;
+
+<hexadecimal-literal> =
+    "0x" <hexadecimal-digit>+
+    ;
+
+<float-literal> =
+    <decimal-digit> "." <decimal-digit>
+    ;
+
+<character-literal> =
+    "'" (<ascii>) | <escape-sequence> "'"
+    ;
+
+<escape-sequence> =
+    "\\" ("n" | "t" | "\\" | "\'" | "\"" | <integer-literal>)
+    ;
+
+(* Grammar *)
+<program> =
+    <declaration>*
+    ;
+
+<declaration> =
+    <function>
+    | <structure>
+    | <enumerator>
+    | <structure-member-function>
+    ;
+
+<function> =
+    ("void" | <type>) <identifier> "(" ("void" | <parameter-list>) ")" <block-statement>
+    ;
+
+<type> =
+    "&"? (<builtin-type> | <identifier>) <dimensions>*
+    ;
+
+<dimensions> =
+    "[" "]"
+    ;
+
+<builtin-type> =
+    "byte"
+    | "short"
+    | "int"
+    | "long"
+    | "float"
+    | "double"
+    | "bool"
+    | "char"
+    ;
+
+<structure> =
+    "struct" <identifier> "{" <variable-declaration-statement> "}"
+    ;
+
+<enumerator> =
+    "enum" <identifier> "{" <identifier-list> "}"
+    ;
+
+<identifier-list> =
+    <identifier> ("," <identifier>)*
+    ;
+
+<structure-member-function> =
+    <identifier> "::" <function>
+    ;
+
+<parameter-list> =
+    <variable-declarator> ("," <variable-declarator>)*
+    ;
+
+<variable-declarator> =
+    <type> <identifier>
+    ;
+
+<block-statement> =
+    "{" <statement>* "}"
+    ;
+
+<statement> =
+    <variable-declaration-statement>
+    | <expression-statement>
+    | <iteration-statement>
+    | <conditional-statement>
+    | <return-statement>
+    | <continue-statement>
+    | <break-statement>
+    ;
+
+<variable-declaration-statement> =
+    <variable-declarator> (";" | "=" <expression-statement>)
+    ;
+
+<expression-statement> =
+    <expression> ";"
+    ;
+
+<iteration-statement> =
+    <while-iteration>
+    ;
+
+<while-iteration> =
+    "while" "(" <expression> ")" <block-statement>
+    ;
+
+<conditional-statement> =
+    "if" "(" <expression> ")" <block-statement> ("else" (<conditional-statement> | <block-statement>))?
+    ;
+
+<return-statement> =
+    "return" (";" | <expression-statement>)
+    ;
+
+<continue-statement> =
+    "continue" ";"
+    ;
+
+<break-statement> =
+    "break" ";"
+    ;
+
+(* Expression *)
+<expression> =
+    <assignment-expression>
+    ;
+
+<assignment-expression> =
+    <boolean-or-expression> (("=" | "+=" | "-=" | "*=" | "/=" | "%=" | "|=" | "^=" | "&=" | "<<=" | ">>=") <boolean-or-expression>)*
+    ;
+
+<boolean-or-expression> =
+    <boolean-xor-expression> ("||" <boolean-xor-expression>)*
+    ;
+
+<boolean-xor-expression> =
+    <boolean-and-expression> ("^^" <boolean-and-expression>)*
+    ;
+
+<boolean-and-expression> =
+    <bitwise-or-expression> ("&&" <bitwise-or-expression>)*
+    ;
+
+<bitwise-or-expression> =
+    <bitwise-xor-expression> ("|" <bitwise-xor-expression>)*
+    ;
+
+<bitwise-xor-expression> =
+    <bitwise-and-expression> ("^" <bitwise-and-expression>)*
+    ;
+
+<bitwise-and-expression> =
+    <equality-expression> ("&" <equality-expression>)*
+    ;
+
+<equality-expression> =
+    <relational-expression> (("==" | "!=") <relational-expression>)*
+    ;
+
+<relational-expression> =
+    <bitshift-expression> (("<" | ">" | "<=" | ">=") <bitshift-expression>)*
+    ;
+
+<bitshift-expression> =
+    <additive-expression> (("<<" | ">>") <additive-expression>)*
+    ;
+
+<additive-expression> =
+    <multiplicative-expression> (("+" | "-") <multiplicative-expression>)*
+    ;
+
+<multiplicative-expression> =
+    <prefix-expression> (("*" | "/" | "%") <prefix-expression>)*
+    ;
+
+<prefix-expression> =
+    ("++" | "--" | "-" | "!" | "~" | "&")? <postfix-expression>
+    ;
+
+<postfix-expression> =
+    <primary-expression> ('++' | '--')?
+    ;
+
+<primary-expression> =
+    "(" <expression> ")"
+    | <literal-expression>
+    | <number>
+    | <variable-call>
+    | <cast-expression>
+    | <array>
+    ;
+
+<literal-expression> =
+    "true"
+    | "false"
+    ;
+
+<variable-call> =
+    <identifier> ("." <variable-call> | "(" <expression-list>? ")" | "[" <expression> "]")?
+    ;
+
+<array> =
+    "[" <expression-list>? "]"
+    | <type> "[" <integer-literal> "]"
+    ;
+
+<cast-expression> =
+    <type> "(" <expression> ")"
+    ;
+
+<expression-list> =
+    <expression> ("," <expression>)*
+    ;
+
