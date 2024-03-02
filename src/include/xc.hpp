@@ -7,8 +7,14 @@
 #define XC_HPP
 
 #include "common.hpp"
+#include "sourcefile.hpp"
 
 namespace XC {
+
+    struct Module {
+    public:
+        std::unique_ptr<SourceFile> source;
+    };
 
     void compile(const std::string target);
 
