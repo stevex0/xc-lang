@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 #include <optional>
-#define some(value) std::optional(value);
-#define none(_)     std::nullopt;
+#define some(value) std::optional(value)
+#define none(_)     std::nullopt
 
 #endif /* COMMON_HPP */
