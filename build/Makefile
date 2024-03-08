@@ -21,7 +21,7 @@ clean:
 build: $(BINARY)
 
 $(BINARY): $(OBJ_FILES)
-	@ $(COMPILER) $(OBJ_DIR)/*.o -o $(BINARY)
+	@ $(COMPILER) $(OBJ_DIR)/*.o -static-libstdc++ -o $(BINARY)
 	@ echo -e " -> " $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
