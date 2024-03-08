@@ -2,7 +2,7 @@
 ///  common.hpp
 ///
 ///  Includes commonly used standard library headers and defines
-///  some utility macros for optional types.
+///  some utility macros.
 /// *==============================================================*
 #ifndef COMMON_HPP
 #define COMMON_HPP
@@ -22,5 +22,8 @@
 #include <optional>
 #define some(value) std::optional(value)
 #define none(_)     std::nullopt
+
+#define min_of(a, b) (a < b ? a : b)
+#define max_of(a, b) (a > b ? a : b)
 
 #endif /* COMMON_HPP */
