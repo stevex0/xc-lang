@@ -115,10 +115,10 @@ Identifiers is a sequences of one or or letters, digit, or underscores. Refer to
 The following words are reserved keywords and may not be used as user-defined identifiers.
 ```
 bool    break   byte    continue    
-enum    false   float   for
-if      int     long    null
-return  short   struct  true
-void    while
+else    enum    false   float
+for     if      int     long
+null    return  short   struct
+true    void    while
 ```
 > :warning: **Note**: This is not a complete list, more reserved words may be introduced in the future!
 
