@@ -170,7 +170,7 @@ void Tokenizer::process(const char c) {
             //       +--- ('=') --> Assignment XOR ('^=')
             //       |
             //       +--> Bitwise XOR ('^')
-            addToken(match('&') ? TokenType::BOOLEAN_OP_XOR : (match('=') ? TokenType::ASSIGNMENT_OP_XOR : TokenType::BITWISE_OP_XOR));
+            addToken(match('^') ? TokenType::BOOLEAN_OP_XOR : (match('=') ? TokenType::ASSIGNMENT_OP_XOR : TokenType::BITWISE_OP_XOR));
             break;
         case '|':
             // --> ('|')
@@ -180,7 +180,7 @@ void Tokenizer::process(const char c) {
             //       +--- ('=') --> Assignment OR ('|=')
             //       |
             //       +--> Bitwise OR ('|')
-            addToken(match('&') ? TokenType::BOOLEAN_OP_OR : (match('=') ? TokenType::ASSIGNMENT_OP_OR : TokenType::BITWISE_OP_OR));
+            addToken(match('|') ? TokenType::BOOLEAN_OP_OR : (match('=') ? TokenType::ASSIGNMENT_OP_OR : TokenType::BITWISE_OP_OR));
             break;
         case '<':
             // --> ('<')
