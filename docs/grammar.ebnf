@@ -80,15 +80,18 @@
     <function>
     | <structure>
     | <enumerator>
-    | <structure-member-function>
     ;
 
 <function> =
-    ("void" | <type>) <identifier> "(" ("void" | <parameter-list>) ")" <block-statement>
+    (<identifier> "::")? ("void" | <type>) <identifier> "(" ("void" | <parameter-list>) ")" <block-statement>
     ;
 
 <type> =
-    "&"? (<builtin-type> | <identifier>) <dimensions>*
+    <base-type> <dimensions>*
+    ;
+
+<basic-type> =
+    "&"? (<builtin-type> | <identifier>)
     ;
 
 <dimensions> =
@@ -107,7 +110,11 @@
     ;
 
 <structure> =
-    "struct" <identifier> "{" <variable-declaration-statement> "}"
+    "struct" <identifier> "{" <structure-members> "}"
+    ;
+
+<structure-members> =
+    <variable-declaration-statement>+
     ;
 
 <enumerator> =
@@ -116,10 +123,6 @@
 
 <identifier-list> =
     <identifier> ("," <identifier>)*
-    ;
-
-<structure-member-function> =
-    <identifier> "::" <function>
     ;
 
 <parameter-list> =
@@ -154,10 +157,15 @@
 
 <iteration-statement> =
     <while-iteration>
+    | <for-iteration>
     ;
 
 <while-iteration> =
     "while" "(" <expression> ")" <block-statement>
+    ;
+
+<for-iteration> =
+    "for" "(" (";" | <variable-declaration-statement>) (";" | <expression>) (";" | <expression>) ")" <block-statement>
     ;
 
 <conditional-statement> =
@@ -234,14 +242,14 @@
     ;
 
 <postfix-expression> =
-    <primary-expression> ('++' | '--')?
+    <primary-expression> ('++' | '--' | <member-access> | <function-call> | <array-access>)?
     ;
 
 <primary-expression> =
     "(" <expression> ")"
     | <literal-expression>
     | <number>
-    | <variable-call>
+    | <identifier>
     | <cast-expression>
     | <array>
     ;
@@ -249,15 +257,32 @@
 <literal-expression> =
     "true"
     | "false"
+    | "null"
     ;
 
-<variable-call> =
-    <identifier> ("." <variable-call> | "(" <expression-list>? ")" | "[" <expression> "]")?
+<member-access> =
+    "." <primary-expression>
+    ;
+
+<function-call>
+    "(" <expression-list>? ")" <primary-expression>?
+    ;
+
+<array-access>
+    "[" <expression> "]" <primary-expression>?
     ;
 
 <array> =
-    "[" <expression-list>? "]"
-    | <type> "[" <integer-literal> "]"
+    <array-initializer-list>
+    | <array-declaration>
+    ;
+
+<array-initializer-list> =
+    "[" <expression-list> "]"
+    ;
+
+<array-declaration> =
+    <basic-type> "[" <number> "]"
     ;
 
 <cast-expression> =
