@@ -83,10 +83,10 @@
     ;
 
 <function> =
-    (<identifier> "::")? ("void" | <type>) <identifier> "(" ("void" | <parameter-list>) ")" <block-statement>
+    (<identifier> "::")? ("void" | <data-type>) <identifier> "(" ("void" | <parameter-list>) ")" <block-statement>
     ;
 
-<type> =
+<data-type> =
     <base-type> <dimensions>*
     ;
 
@@ -114,7 +114,7 @@
     ;
 
 <structure-members> =
-    <variable-declaration-statement>+
+    (<variable-declarator> ";")*
     ;
 
 <enumerator> =
@@ -140,7 +140,8 @@
 <statement> =
     <variable-declaration-statement>
     | <expression-statement>
-    | <iteration-statement>
+    | <while-iteration>
+    | <for-iteration>
     | <conditional-statement>
     | <return-statement>
     | <continue-statement>
@@ -153,11 +154,6 @@
 
 <expression-statement> =
     <expression> ";"
-    ;
-
-<iteration-statement> =
-    <while-iteration>
-    | <for-iteration>
     ;
 
 <while-iteration> =
@@ -242,7 +238,7 @@
     ;
 
 <postfix-expression> =
-    <primary-expression> ('++' | '--' | <member-access> | <function-call> | <array-access>)?
+    <primary-expression> ("." <identifier> | "(" <expression-list>? ")" | "[" <expression > "]")* ("++" | "--")?
     ;
 
 <primary-expression> =
@@ -251,30 +247,14 @@
     | <number>
     | <identifier>
     | <cast-expression>
-    | <array>
+    | <array-initializer-list>
+    | <array-declaration>
     ;
 
 <literal-expression> =
     "true"
     | "false"
     | "null"
-    ;
-
-<member-access> =
-    "." <primary-expression>
-    ;
-
-<function-call>
-    "(" <expression-list>? ")" <primary-expression>?
-    ;
-
-<array-access>
-    "[" <expression> "]" <primary-expression>?
-    ;
-
-<array> =
-    <array-initializer-list>
-    | <array-declaration>
     ;
 
 <array-initializer-list> =
@@ -286,7 +266,7 @@
     ;
 
 <cast-expression> =
-    <type> "(" <expression> ")"
+    <data-type> "(" <expression> ")"
     ;
 
 <expression-list> =
