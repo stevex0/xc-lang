@@ -4,6 +4,7 @@
 #include "include/xc.hpp"
 #include "include/sourcefile.hpp"
 #include "include/tokenizer.hpp"
+#include "include/parser.hpp"
 
 using namespace XC;
 
@@ -20,7 +21,11 @@ void XC::compile(const std::string target) {
         exit(EXIT_FAILURE);
     }
 
-    // TODO: Syntax Analysis
+    module->program = Parser(module).getProgramTree().value_or(nullptr);
+    if (module->program == nullptr) {
+        exit(EXIT_FAILURE);
+    }
+
     // TODO: Semantic Analysis
     // TODO: Code Generation 
 }
