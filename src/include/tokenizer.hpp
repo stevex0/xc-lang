@@ -55,7 +55,7 @@ namespace XC {
         TokenType extractOctalLiteral(void);
         TokenType extractHexadecimalLiteral(void);
         TokenType extractNumericLiteral(void);
-        TokenType extractCharacterLiteral(void);
+        // TokenType extractCharacterLiteral(void);
         TokenType extractEscapeSequence(void);
         TokenType extractUnrecognizedSymbol(void);
     };

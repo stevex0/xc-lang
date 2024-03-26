@@ -210,9 +210,9 @@ void Tokenizer::process(const char c) {
             //       +--> Boolean NOT ('!')
             addToken(match('=') ? TokenType::RELATIONAL_OP_INEQUALITY : TokenType::BOOLEAN_OP_NOT);
             break;
-        case '\'':
-            addToken(extractCharacterLiteral());
-            break;
+        // case '\'':
+        //     addToken(extractCharacterLiteral());
+        //     break;
         default:
             if (isWhitespace(c)) {
                 addToken(extractWhitespace());
@@ -492,145 +492,145 @@ TokenType Tokenizer::extractNumericLiteral(void) {
     return TokenType::INTEGER_LITERAL;
 }
 
-TokenType Tokenizer::extractCharacterLiteral(void) {
-    if (match('\\')) {
-        return extractEscapeSequence();
-    }
+// TokenType Tokenizer::extractCharacterLiteral(void) {
+//     if (match('\\')) {
+//         return extractEscapeSequence();
+//     }
 
-    const char literal = next();
-    if (literal == '\'') {
-        return error("character literal cannot be empty");
-    }
+//     const char literal = next();
+//     if (literal == '\'') {
+//         return error("character literal cannot be empty");
+//     }
 
-    if (isWhitespace(literal) && literal != ' ') {
-        while (!atEnd() && !match('\'')) {
-            next();
-        }
+//     if (isWhitespace(literal) && literal != ' ') {
+//         while (!atEnd() && !match('\'')) {
+//             next();
+//         }
 
-        return error("whitespace other than ` ` is not allow in a character literal; use an escape sequence instead");
-    }
+//         return error("whitespace other than ` ` is not allow in a character literal; use an escape sequence instead");
+//     }
 
-    if (!match('\'')) {
-        while (!atEnd() && !match('\'')) {
-            next();
-        }
+//     if (!match('\'')) {
+//         while (!atEnd() && !match('\'')) {
+//             next();
+//         }
 
-        return error(atEnd() ? "missing terminating `\'`" : "too many characters for a character literal");
-    }
+//         return error(atEnd() ? "missing terminating `\'`" : "too many characters for a character literal");
+//     }
 
-    return TokenType::CHARACTER_LITERAL;
-}
+//     return TokenType::CHARACTER_LITERAL;
+// }
 
-TokenType Tokenizer::extractEscapeSequence(void) {
-    const char c = next();
-    switch (c) {
-        case 'n':
-        case 't':
-        case 'b':
-        case 'r':
-        case 'a':
-        case '\'':
-        case '\"':
-        case '\\':
-        case 'f':
-        case 'v':
-            break;
-        default:
-            // TODO: refactor this 
-            if (c == '0') {
-                if (match('b')) {
-                    if (!isBinaryDigit(current())) {
-                        while (!atEnd() && !match('\'')) {
-                            next();
-                        }
+// TokenType Tokenizer::extractEscapeSequence(void) {
+//     const char c = next();
+//     switch (c) {
+//         case 'n':
+//         case 't':
+//         case 'b':
+//         case 'r':
+//         case 'a':
+//         case '\'':
+//         case '\"':
+//         case '\\':
+//         case 'f':
+//         case 'v':
+//             break;
+//         default:
+//             // TODO: refactor this 
+//             if (c == '0') {
+//                 if (match('b')) {
+//                     if (!isBinaryDigit(current())) {
+//                         while (!atEnd() && !match('\'')) {
+//                             next();
+//                         }
 
-                        return error("incomplete or invalid binary literal");
-                    }
+//                         return error("incomplete or invalid binary literal");
+//                     }
 
-                    while (!atEnd() && isBinaryDigit(current())) {
-                        next();
-                    }
+//                     while (!atEnd() && isBinaryDigit(current())) {
+//                         next();
+//                     }
 
-                    if (isLetterOrDigit(current()) || current() == '_') {
-                        const char invalid = current();
-                        while (!atEnd() && !match('\'')) {
-                            next();
-                        }
+//                     if (isLetterOrDigit(current()) || current() == '_') {
+//                         const char invalid = current();
+//                         while (!atEnd() && !match('\'')) {
+//                             next();
+//                         }
 
-                        return error("invalid binary digit", invalid); 
-                    }
-                } else if (match('o')) {
-                    if (!isOctalDigit(current())) {
-                        while (!atEnd() && !match('\'')) {
-                            next();
-                        }
+//                         return error("invalid binary digit", invalid); 
+//                     }
+//                 } else if (match('o')) {
+//                     if (!isOctalDigit(current())) {
+//                         while (!atEnd() && !match('\'')) {
+//                             next();
+//                         }
 
-                        return error("incomplete or invalid octal literal");
-                    }
+//                         return error("incomplete or invalid octal literal");
+//                     }
 
-                    while (!atEnd() && isOctalDigit(current())) {
-                        next();
-                    }
+//                     while (!atEnd() && isOctalDigit(current())) {
+//                         next();
+//                     }
 
-                    if (isLetterOrDigit(current()) || current() == '_') {
-                        const char invalid = current();
-                        while (!atEnd() && !match('\'')) {
-                            next();
-                        }
+//                     if (isLetterOrDigit(current()) || current() == '_') {
+//                         const char invalid = current();
+//                         while (!atEnd() && !match('\'')) {
+//                             next();
+//                         }
 
-                        return error("invalid octal digit", invalid); 
-                    }
-                } else if (match('x')) {
-                    if (!isHexadecimalDigit(current())) {
-                        while (!atEnd() && !match('\'')) {
-                            next();
-                        }
+//                         return error("invalid octal digit", invalid); 
+//                     }
+//                 } else if (match('x')) {
+//                     if (!isHexadecimalDigit(current())) {
+//                         while (!atEnd() && !match('\'')) {
+//                             next();
+//                         }
 
-                        return error("incomplete or invalid hexadecimal literal");
-                    }
+//                         return error("incomplete or invalid hexadecimal literal");
+//                     }
 
-                    while (!atEnd() && isHexadecimalDigit(current())) {
-                        next();
-                    }
+//                     while (!atEnd() && isHexadecimalDigit(current())) {
+//                         next();
+//                     }
 
-                    if (isLetterOrDigit(current()) || current() == '_') {
-                        const char invalid = current();
-                        while (!atEnd() && !match('\'')) {
-                            next();
-                        }
+//                     if (isLetterOrDigit(current()) || current() == '_') {
+//                         const char invalid = current();
+//                         while (!atEnd() && !match('\'')) {
+//                             next();
+//                         }
 
-                        return error("invalid hexadecimal digit", invalid); 
-                    }
-                } else if (isLetter(current()) || current() == '_') {
-                    while (!atEnd() && !match('\'')) {
-                        next();
-                    }
+//                         return error("invalid hexadecimal digit", invalid); 
+//                     }
+//                 } else if (isLetter(current()) || current() == '_') {
+//                     while (!atEnd() && !match('\'')) {
+//                         next();
+//                     }
 
-                    return error("`0` should be alone or pair with `b`, `o`, or `x`");
-                }
-            } else if (isDigit(c)) {
-                if (extractNumericLiteral() == TokenType::FLOAT_LITERAL) {
-                    while (!atEnd() && !match('\'')) {
-                        next();
-                    }
+//                     return error("`0` should be alone or pair with `b`, `o`, or `x`");
+//                 }
+//             } else if (isDigit(c)) {
+//                 if (extractNumericLiteral() == TokenType::FLOAT_LITERAL) {
+//                     while (!atEnd() && !match('\'')) {
+//                         next();
+//                     }
 
-                    return error("escape sequence cannot be a floating point value");
-                }
-            }
-            break;
-    }
+//                     return error("escape sequence cannot be a floating point value");
+//                 }
+//             }
+//             break;
+//     }
 
-    if (!match('\'')) {
-        const char invalid = current();
-        while (!atEnd() && !match('\'')) {
-            next();
-        }
+//     if (!match('\'')) {
+//         const char invalid = current();
+//         while (!atEnd() && !match('\'')) {
+//             next();
+//         }
 
-        return error("invalid escape sequence", invalid);
-    }
+//         return error("invalid escape sequence", invalid);
+//     }
 
-    return TokenType::CHARACTER_LITERAL;
-}
+//     return TokenType::CHARACTER_LITERAL;
+// }
 
 TokenType Tokenizer::extractUnrecognizedSymbol(void) {
     while (!atEnd() && !isRecognized(current())) {
