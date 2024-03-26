@@ -87,11 +87,7 @@
     ;
 
 <data-type> =
-    <base-type> <dimensions>*
-    ;
-
-<basic-type> =
-    "&"? (<builtin-type> | <identifier>)
+    "&"? (<builtin-type> | <identifier>) <dimensions>*
     ;
 
 <dimensions> =
@@ -262,7 +258,7 @@
     ;
 
 <array-declaration> =
-    <basic-type> "[" <number> "]"
+    <data-type> "[" <number> "]"
     ;
 
 <cast-expression> =
