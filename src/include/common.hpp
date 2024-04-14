@@ -15,12 +15,13 @@
 #include <iostream>
 #include <memory>
 
+#include <stack>
 #include <vector>
+#include <unordered_set>
 #include <unordered_map>
 
-#include <optional>
-#define some(value) std::optional(value)
-#define none(_)     std::nullopt
+#define some(value) value
+#define none(_) nullptr
 
 #define min_of(a, b) (a < b ? a : b)
 #define max_of(a, b) (a > b ? a : b)

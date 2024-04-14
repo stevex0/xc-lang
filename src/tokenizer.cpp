@@ -640,6 +640,7 @@ TokenType Tokenizer::extractUnrecognizedSymbol(void) {
     return error("Unrecognized symbol", lexeme_buffer.at(0));
 }
 
-std::optional<std::unique_ptr<TokenStream>> Tokenizer::extractTokenStream(void) {
-    return has_error ? none() : some(std::move(tokens));
+std::unique_ptr<TokenStream> Tokenizer::extractTokenStream(const std::unique_ptr<Module>& module) {
+    Tokenizer tokenizer(module);
+    return tokenizer.has_error ? none() : some(std::move(tokenizer.tokens));
 }

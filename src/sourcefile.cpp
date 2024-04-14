@@ -6,7 +6,7 @@
 #include <cstring>
 #include <fstream>
 
-std::optional<std::unique_ptr<XC::SourceFile>> XC::SourceFile::loadContent(const std::string filepath) {
+std::unique_ptr<XC::SourceFile> XC::SourceFile::loadContent(const std::string filepath) {
     std::ifstream infile(filepath);
 
     if (!infile.is_open()) {
@@ -25,5 +25,5 @@ std::optional<std::unique_ptr<XC::SourceFile>> XC::SourceFile::loadContent(const
 
     infile.close();
 
-    return some(std::move(source_file));
+    return some(source_file);
 }

@@ -15,7 +15,7 @@ namespace XC {
         std::string filename;
         std::vector<std::string> content;
 
-        static std::optional<std::unique_ptr<SourceFile>> loadContent(const std::string filepath);
+        static std::unique_ptr<SourceFile> loadContent(const std::string filepath);
     };
 
 }

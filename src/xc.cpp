@@ -5,24 +5,22 @@
 #include "include/sourcefile.hpp"
 #include "include/tokenizer.hpp"
 #include "include/parser.hpp"
+#include "include/analyzer.hpp"
 
 using namespace XC;
 
 void XC::compile(const std::string target) {
-    std::unique_ptr<Module> module = std::make_unique<Module>();
+    const std::unique_ptr<Module> module = std::make_unique<Module>();
 
-    module->source = SourceFile::loadContent(target).value_or(nullptr);
-    if (module->source == nullptr) {
+    if ((module->source = SourceFile::loadContent(target)) == nullptr) {
         exit(EXIT_FAILURE);
     }
 
-    module->tokens = Tokenizer(module).extractTokenStream().value_or(nullptr);
-    if (module->tokens == nullptr) {
+    if ((module->tokens = Tokenizer::extractTokenStream(module)) == nullptr) {
         exit(EXIT_FAILURE);
     }
 
-    module->program = Parser(module).getProgramTree().value_or(nullptr);
-    if (module->program == nullptr) {
+    if ((module->program = Parser::getProgramTree(module)) == nullptr) {
         exit(EXIT_FAILURE);
     }
 

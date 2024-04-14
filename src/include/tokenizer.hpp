@@ -17,7 +17,7 @@ namespace XC {
     public:
         Tokenizer(const std::unique_ptr<Module>& module);
 
-        std::optional<std::unique_ptr<TokenStream>> extractTokenStream();
+        static std::unique_ptr<TokenStream> extractTokenStream(const std::unique_ptr<Module>& module);
 
     private:
         const std::unique_ptr<Module>& module;

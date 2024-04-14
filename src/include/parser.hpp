@@ -18,7 +18,7 @@ namespace XC {
     public:
         Parser(const std::unique_ptr<Module>& module);
 
-        std::optional<std::unique_ptr<Program>> getProgramTree();
+        static std::unique_ptr<Program> getProgramTree(const std::unique_ptr<Module>& module);
     private:
         const std::unique_ptr<Module>& module;
 

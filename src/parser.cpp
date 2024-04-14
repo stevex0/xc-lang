@@ -158,8 +158,8 @@ void Parser::reportError(ErrorNode*& error) {
 
 AST* Parser::parseDeclaration(void) {
     return tryParse({
-        parseStructure,
-        parseFunction
+        &Parser::parseStructure,
+        &Parser::parseFunction
     }, "expected declaration");
 }
 
@@ -173,10 +173,12 @@ AST* Parser::parseFunction(void) {
         next(); // ::
     }
 
-    function->return_type = (DataType*) parseDataType();
-    if (ErrorNode* error_in_return_type = get_node_if(function->return_type, ErrorNode)) {
-        function->return_type = nullptr;
-        errors->appendError(error_in_return_type);
+    if (!consumeIf(TokenType::TYPE_VOID)) {
+        function->return_type = (DataType*) parseDataType();
+        if (ErrorNode* error_in_return_type = get_node_if(function->return_type, ErrorNode)) {
+            function->return_type = nullptr;
+            errors->appendError(error_in_return_type);
+        }
     }
     
     if (!match(TokenType::IDENTIFIER)) {
@@ -190,7 +192,7 @@ AST* Parser::parseFunction(void) {
     }
 
     if (!consumeIf(TokenType::TYPE_VOID)) {
-        function->parameters = (ParameterList*) tryParse({parseParameters}, "expected parameters");
+        function->parameters = (ParameterList*) tryParse({&Parser::parseParameters}, "expected parameters");
         if (ErrorNode* error_in_parameters = get_node_if(function->parameters, ErrorNode)) {
             function->parameters = nullptr;
             errors->appendError(error_in_parameters);
@@ -239,7 +241,7 @@ AST* Parser::parseStructure(void) {
         errors->appendError(error("expected `{`"));
     }
 
-    structure->members = (StructureMembers*) tryParse({parseStructureMembers}, "expected structure members");
+    structure->members = (StructureMembers*) tryParse({&Parser::parseStructureMembers}, "expected structure members");
     if (ErrorNode* error_in_members = get_node_if(structure->members, ErrorNode)) {
         structure->members = nullptr;
         errors->appendError(error_in_members);
@@ -372,14 +374,14 @@ AST* Parser::parseBlockStatement(void) {
 
 AST* Parser::parseStatement(void) {
     return tryParse({
-        parseExpressionStatement,
-        parseVariableDeclarationStatement,
-        parseConditionalStatement,
-        parseWhileIteration,
-        parseForIteration,
-        parseReturnStatement,
-        parseContinueStatement,
-        parseBreakStatement
+        &Parser::parseExpressionStatement,
+        &Parser::parseVariableDeclarationStatement,
+        &Parser::parseConditionalStatement,
+        &Parser::parseWhileIteration,
+        &Parser::parseForIteration,
+        &Parser::parseReturnStatement,
+        &Parser::parseContinueStatement,
+        &Parser::parseBreakStatement
     }, "expected statement");
 }
 
@@ -616,8 +618,8 @@ AST* Parser::parseConditionalStatement(void) {
 
     if (consumeIf(TokenType::KEYWORD_ELSE)) {
         conditional->else_case = (ConditionalStatement*) tryParse({
-            parseConditionalStatement,
-            parseBlockStatement
+            &Parser::parseConditionalStatement,
+            &Parser::parseBlockStatement
         }, "expected keyword `if` or `{`");
     }
 
@@ -654,8 +656,7 @@ AST* Parser::parseDataType(void) {
         || match(TokenType::TYPE_INT)
         || match(TokenType::TYPE_LONG)
         || match(TokenType::TYPE_FLOAT)
-        || match(TokenType::TYPE_DOUBLE)
-        || match(TokenType::TYPE_VOID))
+        || match(TokenType::TYPE_DOUBLE))
     ) {
         delete data_type;
         return error("expected identifier, or type");
@@ -1056,10 +1057,10 @@ AST* Parser::parsePostfix(void) {
 
 AST* Parser::parsePrimary(void) {
     return tryParse({
-            parseGrouping,
-            parseLiteral,
-            parseNumberConstant,
-            parseIdentifierConstant
+            &Parser::parseGrouping,
+            &Parser::parseLiteral,
+            &Parser::parseNumberConstant,
+            &Parser::parseIdentifierConstant
             // ,parseCastExpression TODO
         }, "expected primary expression");
 }
@@ -1182,6 +1183,7 @@ AST* Parser::tryParse(const std::vector<ProductionRule>& rules, const std::strin
     return result_error;
 }
 
-std::optional<std::unique_ptr<Program>> Parser::getProgramTree() {
-    return has_error ? none() : some(std::move(program));
+std::unique_ptr<Program> Parser::getProgramTree(const std::unique_ptr<Module>& module) {
+    Parser parser(module);
+    return parser.has_error ? none() : some(std::move(parser.program));
 }
