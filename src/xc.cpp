@@ -24,6 +24,9 @@ void XC::compile(const std::string target) {
         exit(EXIT_FAILURE);
     }
 
-    // TODO: Semantic Analysis
+    if ((module->symbols = Analyzer::validateSemantics(module)) == nullptr) {
+        exit(EXIT_FAILURE);
+    } 
+
     // TODO: Code Generation 
 }

@@ -10,6 +10,7 @@
 #include "sourcefile.hpp"
 #include "token.hpp"
 #include "ast.hpp"
+#include "symboltable.hpp"
 
 namespace XC {
 
@@ -18,6 +19,7 @@ namespace XC {
         std::unique_ptr<SourceFile> source;
         std::unique_ptr<TokenStream> tokens;
         std::unique_ptr<Program> program;
+        std::unique_ptr<SymbolTable> symbols;
     };
 
     void compile(const std::string target);
