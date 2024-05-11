@@ -6,6 +6,19 @@
 #include <cstring>
 #include <fstream>
 
+using namespace XC;
+
+void SourceFile::writeOut(void) {
+    std::ofstream outfile(filename);
+
+    for (const std::string& line : content) {
+        outfile << line << '\n';
+    }
+
+    outfile.flush();
+    outfile.close();
+}
+
 std::unique_ptr<XC::SourceFile> XC::SourceFile::loadContent(const std::string filepath) {
     std::ifstream infile(filepath);
 
