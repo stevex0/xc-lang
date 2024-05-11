@@ -116,8 +116,33 @@ namespace XC {
         }
     };
 
+    struct DataType : public AST {
+    public:
+        bool is_reference;
+        IdentifierToken* type_name;
+        uint32_t dimensions;
+
+        DataType(void)
+            : is_reference(false),
+              type_name(nullptr),
+              dimensions(0) {}
+
+        ASTType type(void) const {
+            return ASTType::DataType;
+        }
+    };
+
     struct Expression : public AST {
     public:
+        DataType* evaluated_type;
+
+        Expression(void)
+            : evaluated_type(nullptr) {}
+
+        ~Expression() {
+            delete evaluated_type;
+        }
+
         ASTType type(void) const {
             return ASTType::Expression;
         }
@@ -161,21 +186,21 @@ namespace XC {
 
     // <*> ================================================================ <*>
 
-    struct DataType : public AST {
-    public:
-        bool is_reference;
-        IdentifierToken* type_name;
-        uint32_t dimensions;
+    // struct DataType : public AST {
+    // public:
+    //     bool is_reference;
+    //     IdentifierToken* type_name;
+    //     uint32_t dimensions;
 
-        DataType(void)
-            : is_reference(false),
-              type_name(nullptr),
-              dimensions(0) {}
+    //     DataType(void)
+    //         : is_reference(false),
+    //           type_name(nullptr),
+    //           dimensions(0) {}
 
-        ASTType type(void) const {
-            return ASTType::DataType;
-        }
-    };
+    //     ASTType type(void) const {
+    //         return ASTType::DataType;
+    //     }
+    // };
 
     struct VariableDeclarator : public AST {
     public:

@@ -168,37 +168,41 @@ void Analyzer::validateFunctionBody(const Function* function) {
     symbol_stack.popStack();
 }
 
-const DataType* Analyzer::getTypeOfExpression(SymbolStack& symbols, const Expression* expression) {
+DataType* Analyzer::getTypeOfExpression(SymbolStack& symbols, Expression* expression) {
     if (expression == nullptr) {
         return nullptr;
     }
 
-    if (const PrefixUnaryExpression* prefix = get_node_if(expression, PrefixUnaryExpression)) {
-        return getTypeOfPrefixExpression(symbols, prefix);
-    }
-    else if (const PostfixUnaryExpression* postfix = get_node_if(expression,  PostfixUnaryExpression)) {
-        return getTypeOfPostfixExpression(symbols, postfix);
-    }
-    else if (const BinaryExpression* binary = get_node_if(expression, BinaryExpression)) {
-        return getTypeOfBinaryExpression(symbols, binary);
-    }
-    else if (const NumberConstant* number = get_node_if(expression, NumberConstant)) {
-        return getTypeOfNumberExpression(number);
-    }
-    else if (const IdentifierConstant* identifier = get_node_if(expression, IdentifierConstant)) {
-        return getTypeOfIdentifier(symbols, identifier);
-    }
-    else if (const LiteralExpression* literal = get_node_if(expression, LiteralExpression)) {
-        return getTypeOfLiteral(literal);
-    } 
-    else if (const MemberAccess* member_access = get_node_if(expression, MemberAccess)) {
-        return getTypeOfMemberAccess(symbols, member_access);
-    }
-    else if (const FunctionCall* function_call = get_node_if(expression, FunctionCall)) {
-        return getTypeOfFunctionCall(symbols, function_call);
+    if (expression->evaluated_type != nullptr) {
+        return expression->evaluated_type;
     }
 
-    return nullptr;
+    if (PrefixUnaryExpression* prefix = get_node_if(expression, PrefixUnaryExpression)) {
+        expression->evaluated_type = getTypeOfPrefixExpression(symbols, prefix);
+    }
+    else if (PostfixUnaryExpression* postfix = get_node_if(expression,  PostfixUnaryExpression)) {
+        expression->evaluated_type = getTypeOfPostfixExpression(symbols, postfix);
+    }
+    else if (BinaryExpression* binary = get_node_if(expression, BinaryExpression)) {
+        expression->evaluated_type = getTypeOfBinaryExpression(symbols, binary);
+    }
+    else if (NumberConstant* number = get_node_if(expression, NumberConstant)) {
+        expression->evaluated_type = getTypeOfNumberExpression(number);
+    }
+    else if (IdentifierConstant* identifier = get_node_if(expression, IdentifierConstant)) {
+        expression->evaluated_type = getTypeOfIdentifier(symbols, identifier);
+    }
+    else if (LiteralExpression* literal = get_node_if(expression, LiteralExpression)) {
+        expression->evaluated_type = getTypeOfLiteral(literal);
+    } 
+    else if (MemberAccess* member_access = get_node_if(expression, MemberAccess)) {
+        expression->evaluated_type = getTypeOfMemberAccess(symbols, member_access);
+    }
+    else if (FunctionCall* function_call = get_node_if(expression, FunctionCall)) {
+        expression->evaluated_type = getTypeOfFunctionCall(symbols, function_call);
+    }
+
+    return expression->evaluated_type;
 }
 
 void Analyzer::validateBlockStatement(SymbolStack& stack, const BlockStatement* block) {
@@ -230,7 +234,7 @@ void Analyzer::validateStatement(SymbolStack& stack, const Statement* statement)
         }
 
         if (initial_value != nullptr) {
-            const DataType* initial_value_type = getTypeOfExpression(stack, initial_value);
+            const DataType* initial_value_type = getTypeOfExpression(stack, (Expression*) initial_value);
 
             if (initial_value_type == nullptr) {
                 error("could not assign initial value", variable_name);
@@ -266,12 +270,12 @@ void Analyzer::validateStatement(SymbolStack& stack, const Statement* statement)
             validateStatement(stack, initial);
         }
 
-        if (condition != nullptr && !isBooleanType(getTypeOfExpression(stack, condition))) {
+        if (condition != nullptr && !isBooleanType(getTypeOfExpression(stack, (Expression*) condition))) {
             error("for loop condition must evaluate to a bool", nullptr);
         }
 
         if (update != nullptr) {
-            getTypeOfExpression(stack, update);
+            getTypeOfExpression(stack, (Expression*) update);
         }
 
         validateBlockStatement(stack, body);
@@ -281,7 +285,6 @@ void Analyzer::validateStatement(SymbolStack& stack, const Statement* statement)
     }
     else if (const ReturnStatement* return_statement = get_node_if(statement, ReturnStatement)) {
         // get function return type 
-        // const Function* function = get_node_if(stack.searchParent<Function>(), Function);
         const Function* function = getParentFunctionFromStack(stack);
 
         if (function == nullptr) {
@@ -318,7 +321,7 @@ void Analyzer::validateStatement(SymbolStack& stack, const Statement* statement)
     }
 }
 
-const DataType* Analyzer::getTypeOfPrefixExpression(SymbolStack& symbols, const PrefixUnaryExpression* expression) {
+DataType* Analyzer::getTypeOfPrefixExpression(SymbolStack& symbols, PrefixUnaryExpression* expression) {
     const OperatorToken* operation = expression->operation;
     const Expression* operand = expression->operand;
 
@@ -327,33 +330,32 @@ const DataType* Analyzer::getTypeOfPrefixExpression(SymbolStack& symbols, const 
         case TokenType::OP_DECREMENT: {
             if (const IdentifierConstant* identifier = get_node_if(operand, IdentifierConstant)) {
                 if (const DataType* type = symbols.lookupSymbol(identifier->value->lexeme); isIntegerType(type) && type->dimensions == 0) {
-                    return type;
+                    return copyDataType(getTypeOfExpression(symbols, (Expression*) identifier));
                 }
             }
-
             return error("invalid operand for prefix `" + operation->lexeme + "`", operation);
         }
         case TokenType::BOOLEAN_OP_NOT: {
-            const DataType* operand_type = getTypeOfExpression(symbols, operand);
+            const DataType* operand_type = getTypeOfExpression(symbols, (Expression*) operand);
 
             if (operand_type != nullptr && operand_type->type_name->lexeme == "bool" && operand_type->dimensions == 0) {
-                return operand_type;
+                return copyDataType(operand_type);
             }
 
             return error("invalid operand for prefix `" + operation->lexeme + "`", operation);
         }
         case TokenType::BITWISE_OP_COMPLEMENT: {
-            const DataType* operand_type = getTypeOfExpression(symbols, operand);
+            const DataType* operand_type = getTypeOfExpression(symbols, (Expression*) operand);
 
             if (isIntegerType(operand_type) && operand_type->dimensions == 0) {
-                return operand_type;
+                return copyDataType(operand_type);
             }
 
             return error("invalid operand for prefix `" + operation->lexeme + "`", operation);
         }
         case TokenType::ARITHMETIC_OP_SUB: {
             if (const NumberConstant* number = get_node_if(operand, NumberConstant)) {
-                return getTypeOfExpression(symbols, number);
+                return copyDataType(getTypeOfExpression(symbols, (Expression*) number));
             }
 
             return error("invalid operand for prefix `" + operation->lexeme + "`", operation);
@@ -364,7 +366,7 @@ const DataType* Analyzer::getTypeOfPrefixExpression(SymbolStack& symbols, const 
                 return error("cannot get the reference", operation);
             }
 
-            const DataType* operand_type = getTypeOfExpression(symbols, operand);
+            const DataType* operand_type = getTypeOfExpression(symbols, (Expression*) operand);
             
             if (operand_type == nullptr) {
                 return error("could not infer type", operation);
@@ -374,44 +376,33 @@ const DataType* Analyzer::getTypeOfPrefixExpression(SymbolStack& symbols, const 
                 return error("cannot get the reference", operation);
             }
 
-            DataType* type = new DataType;
+            DataType* with_ref = copyDataType(operand_type);
+            with_ref->is_reference = true;
 
-            type->dimensions = 0;
-            type->is_reference = true;
-            
-            Token* ref_type = new Token;
+            return with_ref;
 
-            ref_type->lexeme = operand_type->type_name->lexeme;
-            ref_type->column = operand_type->type_name->column;
-            ref_type->line = operand_type->type_name->line;
-            ref_type->index = operand_type->type_name->index;
-            ref_type->type = operand_type->type_name->type;
-
-            type->type_name = ref_type;
-
-            return type;
 
         }
         default: return nullptr;
     }
 }
 
-const DataType* Analyzer::getTypeOfPostfixExpression(SymbolStack& symbols, const PostfixUnaryExpression* expression) {
+DataType* Analyzer::getTypeOfPostfixExpression(SymbolStack& symbols, PostfixUnaryExpression* expression) {
     if (const IdentifierConstant* identifier = get_node_if(expression->operand, IdentifierConstant)) {
         if (const DataType* type = symbols.lookupSymbol(identifier->value->lexeme); isIntegerType(type) && type->dimensions == 0) {
-            return type;
+            return copyDataType(getTypeOfExpression(symbols, (Expression*) identifier));
         }
     }
 
     return error("invalid operand for postfix `" + expression->operation->lexeme + "`", expression->operation);
 }
 
-const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const BinaryExpression* expression) {
+DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, BinaryExpression* expression) {
     const OperatorToken* operation = expression->operation;
     const Expression* left_operand = expression->left_operand;
     const Expression* right_operand = expression->right_operand;
-    const DataType* left_type = getTypeOfExpression(symbols, left_operand);
-    const DataType* right_type = getTypeOfExpression(symbols, right_operand);
+    const DataType* left_type = getTypeOfExpression(symbols, (Expression*) left_operand);
+    const DataType* right_type = getTypeOfExpression(symbols, (Expression*) right_operand);
 
     if (left_type == nullptr || right_type == nullptr) {
         return nullptr;
@@ -423,13 +414,13 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
         case TokenType::ARITHMETIC_OP_MUL:
         case TokenType::ARITHMETIC_OP_DIV: {
             if (isIntegerType(left_type) && isIntegerType(right_type)) {
-                return left_type;
+                return copyDataType(left_type);
             } else if (isIntegerType(left_type) && isFloatingPointType(right_type)) {
-                return right_type;
+                return copyDataType(right_type);
             } else if (isFloatingPointType(left_type) && isIntegerType(right_type)) {
-                return left_type;
+                return copyDataType(left_type);
             } else if (isFloatingPointType(left_type) && isFloatingPointType(right_type)) {
-                return left_type;
+                return copyDataType(left_type);
             } else {
                 return error("no support for `" + operation->lexeme + "` operation between `" + left_type->type_name->lexeme + "` and `" + right_type->type_name->lexeme + "`", operation);
             }
@@ -441,7 +432,7 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
         case TokenType::BITWISE_OP_LEFT_SHIFT:
         case TokenType::BITWISE_OP_RIGHT_SHIFT: {
             if (isIntegerType(left_type) && isIntegerType(right_type)) {
-                return left_type;
+                return copyDataType(left_type);
             }
             
             // both operands must be int types
@@ -450,7 +441,7 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
         case TokenType::RELATIONAL_OP_EQUALITY:
         case TokenType::RELATIONAL_OP_INEQUALITY: {
             if (isBooleanType(left_type) && isBooleanType(right_type)) {
-                return left_type;
+                return copyDataType(left_type);
             }
 
             if (
@@ -517,7 +508,7 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
         case TokenType::BOOLEAN_OP_OR:
         case TokenType::BOOLEAN_OP_XOR: {
             if (isBooleanType(left_type) && isBooleanType(right_type)) {
-                return left_type;
+                return copyDataType(left_type);
             }
 
             return error("no support for `" + operation->lexeme + "` operation between `" + left_type->type_name->lexeme + "` and `" + right_type->type_name->lexeme + "`", operation);
@@ -534,7 +525,7 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
             }
 
 
-            return left_type;
+            return copyDataType(left_type);
         }
         case TokenType::ASSIGNMENT_OP_ADD:
         case TokenType::ASSIGNMENT_OP_SUB:
@@ -554,7 +545,7 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
                 return error("right operand must be either an integer type or floating point type", operation);
             }
 
-            return left_type;
+            return copyDataType(left_type);
         }
         case TokenType::ASSIGNMENT_OP_MOD:
         case TokenType::ASSIGNMENT_OP_AND:
@@ -576,14 +567,14 @@ const DataType* Analyzer::getTypeOfBinaryExpression(SymbolStack& symbols, const 
                 return error("right operand must be either an integer type", operation);
             }
 
-            return left_type;
+            return copyDataType(left_type);
         }
 
         default: return nullptr;
     }
 }
 
-const DataType* Analyzer::getTypeOfNumberExpression(const NumberConstant* number) {
+DataType* Analyzer::getTypeOfNumberExpression(NumberConstant* number) {
     switch (number->value->type) {
         case TokenType::INTEGER_LITERAL: {
             DataType* type = new DataType;
@@ -625,15 +616,15 @@ const DataType* Analyzer::getTypeOfNumberExpression(const NumberConstant* number
     }
 }
 
-const DataType* Analyzer::getTypeOfIdentifier(SymbolStack& symbols, const IdentifierConstant* identifier) {
+DataType* Analyzer::getTypeOfIdentifier(SymbolStack& symbols, IdentifierConstant* identifier) {
     if (const DataType* type = symbols.lookupSymbol(identifier->value->lexeme)) {
-        return type;
+        return copyDataType(type);
     }
 
     return error("`" + identifier->value->lexeme + "` is undefined", identifier->value);
 }
 
-const DataType* Analyzer::getTypeOfLiteral(const LiteralExpression* literal) {
+DataType* Analyzer::getTypeOfLiteral(LiteralExpression* literal) {
     switch (literal->value->type) {
         case TokenType::LITERAL_BOOLEAN_TRUE:
         case TokenType::LITERAL_BOOLEAN_FALSE: {
@@ -677,11 +668,11 @@ const DataType* Analyzer::getTypeOfLiteral(const LiteralExpression* literal) {
     }
 }
 
-const DataType* Analyzer::getTypeOfMemberAccess(SymbolStack& symbols, const MemberAccess* member_access) {
+DataType* Analyzer::getTypeOfMemberAccess(SymbolStack& symbols, MemberAccess* member_access) {
     const Expression* owner = member_access->owner;
     const IdentifierToken* member = member_access->member;
 
-    const DataType* owner_type = getTypeOfExpression(symbols, owner);
+    const DataType* owner_type = getTypeOfExpression(symbols, (Expression*) owner);
 
     if (owner_type == nullptr) {
         return error("could not determine what `" + member->lexeme + "` is", member);
@@ -695,14 +686,14 @@ const DataType* Analyzer::getTypeOfMemberAccess(SymbolStack& symbols, const Memb
 
     for (const VariableDeclarator* variable_declarator : members->members) {
         if (variable_declarator->variable_name->lexeme == member->lexeme) {
-            return variable_declarator->data_type;
+            return copyDataType(variable_declarator->data_type);
         }
     }
 
     return error("struct `" + structure->name->lexeme + "` does not have a member `" + member->lexeme + "`", member);
 }
 
-const DataType* Analyzer::getTypeOfFunctionCall(SymbolStack& symbols, const FunctionCall* function_call) {
+DataType* Analyzer::getTypeOfFunctionCall(SymbolStack& symbols, FunctionCall* function_call) {
     if (const IdentifierConstant* identifier = get_node_if(function_call->function, IdentifierConstant)) {
         const Function* function = symbol_table->lookupFunction(identifier->value->lexeme);
 
@@ -730,13 +721,13 @@ const DataType* Analyzer::getTypeOfFunctionCall(SymbolStack& symbols, const Func
             }
         }
         
-        return function->return_type;
+        return copyDataType(function->return_type);
     }
     else if (const MemberAccess* member_access = get_node_if(function_call->function, MemberAccess)) {
         const Expression* operand = member_access->owner;
         const IdentifierToken* member_function = member_access->member;
 
-        const DataType* operand_type = getTypeOfExpression(symbols, operand);
+        const DataType* operand_type = getTypeOfExpression(symbols, (Expression*) operand);
         const Function* function = symbol_table->lookupFunction(member_function->lexeme);
 
         if (operand_type == nullptr) {
@@ -768,7 +759,7 @@ const DataType* Analyzer::getTypeOfFunctionCall(SymbolStack& symbols, const Func
             }
         }
         
-        return function->return_type;
+        return copyDataType(function->return_type);
     }
     // else if (const ArrayAccess* array_access = get_node_if(function_call->function, ArrayAccess)) {
     //     return error("array access", nullptr);
@@ -776,6 +767,29 @@ const DataType* Analyzer::getTypeOfFunctionCall(SymbolStack& symbols, const Func
     else {
         return error("cannot call function", nullptr);
     }
+}
+
+DataType* Analyzer::copyDataType(const DataType* type) {
+    if (type == nullptr) {
+        return nullptr;
+    }
+
+    DataType* copy = new DataType;
+
+    copy->dimensions = type->dimensions;
+    copy->is_reference = type->is_reference;
+
+    Token* type_name = new Token;
+
+    type_name->lexeme = type->type_name->lexeme;
+    type_name->column = type->type_name->column;
+    type_name->line = type->type_name->line;
+    type_name->index = type->type_name->index;
+    type_name->type = type->type_name->type;
+
+    copy->type_name = type_name;
+
+    return copy;
 }
 
 void Analyzer::validateConditionalStatement(SymbolStack& symbols, const ConditionalStatement* conditional) {
@@ -793,7 +807,15 @@ void Analyzer::validateConditionalStatement(SymbolStack& symbols, const Conditio
 
     symbols.popStack();
 
-    validateConditionalStatement(symbols, conditional->else_case);
+    if (const BlockStatement* else_case = get_node_if(conditional->else_case, BlockStatement)) {
+        symbols.pushStack(conditional);
+
+        validateBlockStatement(symbols, else_case);
+
+        symbols.popStack();
+    } else {
+        validateConditionalStatement(symbols, conditional->else_case);
+    }
 }
 
 std::nullptr_t Analyzer::error(const std::string& message, const Token* token) {

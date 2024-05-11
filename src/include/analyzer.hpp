@@ -35,19 +35,21 @@ namespace XC {
         void validateFunctionParameters(const Function* function);
         void validateFunctionBody(const Function* function);
 
-        const DataType* getTypeOfExpression(SymbolStack& symbols, const Expression* expression);
+        DataType* getTypeOfExpression(SymbolStack& symbols, Expression* expression);
 
         void validateBlockStatement(SymbolStack& stack, const BlockStatement* block);
         void validateStatement(SymbolStack& stack, const Statement* statement);
 
-        const DataType* getTypeOfPrefixExpression(SymbolStack& symbols, const PrefixUnaryExpression* expression);
-        const DataType* getTypeOfPostfixExpression(SymbolStack& symbols, const PostfixUnaryExpression* expression);
-        const DataType* getTypeOfBinaryExpression(SymbolStack& symbols, const BinaryExpression* expression);
-        const DataType* getTypeOfNumberExpression(const NumberConstant* number);
-        const DataType* getTypeOfIdentifier(SymbolStack& symbols, const IdentifierConstant* identifier);
-        const DataType* getTypeOfLiteral(const LiteralExpression* literal);
-        const DataType* getTypeOfMemberAccess(SymbolStack& symbols, const MemberAccess* member_access);
-        const DataType* getTypeOfFunctionCall(SymbolStack& symbols, const FunctionCall* function_call);
+        DataType* getTypeOfPrefixExpression(SymbolStack& symbols, PrefixUnaryExpression* expression);
+        DataType* getTypeOfPostfixExpression(SymbolStack& symbols, PostfixUnaryExpression* expression);
+        DataType* getTypeOfBinaryExpression(SymbolStack& symbols, BinaryExpression* expression);
+        DataType* getTypeOfNumberExpression(NumberConstant* number);
+        DataType* getTypeOfIdentifier(SymbolStack& symbols, IdentifierConstant* identifier);
+        DataType* getTypeOfLiteral(LiteralExpression* literal);
+        DataType* getTypeOfMemberAccess(SymbolStack& symbols, MemberAccess* member_access);
+        DataType* getTypeOfFunctionCall(SymbolStack& symbols, FunctionCall* function_call);
+
+        DataType* copyDataType(const DataType* type);
 
         void validateConditionalStatement(SymbolStack& symbols, const ConditionalStatement* conditional);
 
