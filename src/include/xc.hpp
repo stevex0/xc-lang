@@ -20,6 +20,7 @@ namespace XC {
         std::unique_ptr<TokenStream> tokens;
         std::unique_ptr<Program> program;
         std::unique_ptr<SymbolTable> symbols;
+        std::unique_ptr<SourceFile> code;
     };
 
     void compile(const std::string target);

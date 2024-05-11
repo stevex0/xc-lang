@@ -6,6 +6,7 @@
 #include "include/tokenizer.hpp"
 #include "include/parser.hpp"
 #include "include/analyzer.hpp"
+#include "include/cgenerator.hpp"
 
 using namespace XC;
 
@@ -28,5 +29,9 @@ void XC::compile(const std::string target) {
         exit(EXIT_FAILURE);
     } 
 
-    // TODO: Code Generation 
+    if ((module->code = CGenerator::generateCode(module)) == nullptr) {
+        exit(EXIT_FAILURE);
+    }
+
+    module->code->writeOut();
 }
