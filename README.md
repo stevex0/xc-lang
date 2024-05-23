@@ -1,4 +1,4 @@
-# The XC Programming Language
+# The XC Programming Language ![GNU GPL-3.0](https://img.shields.io/badge/License-GPL3-c50112)
 
 **XC** is a statically typed, compiled, procedural programming language designed for general-purpose use.
 
@@ -52,6 +52,3 @@ The XC project is organized as follows:
 | `build/` | Contains the `Makefile` used to build the project. During the build process, object files will be generated in the `build/obj` directory. Once the build is complete, the executable will be located in the `build/bin` directory. |
 | `docs/` | Contains additional documentation, including the language's *grammar* and *specifications*. |
 | `src/` | Contains the C++ source code files. Header files are located in the `src/include` directory. |
-
-## License
-[GNU GPL-3.0](LICENSE)
