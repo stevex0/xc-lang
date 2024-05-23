@@ -21,7 +21,7 @@ make COMPILER="g++"
 > The `COMPILER` variable can be omitted if you want to compile the project with `g++`. If you decide to use another C++ compiler, replace `g++` with your desired c++ compiler.
 
 > [!CAUTION]
-> Any C++ compiler other than `g++` has not been tested. You have been warn.
+> Any C++ compiler other than `g++` has not been tested.
 
 If all goes well, there will be a new executable file called `xc` located in the `build/bin` directory.
 
