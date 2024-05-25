@@ -12,8 +12,8 @@ Ensure that you have the following dependencies installed on your system:
 
 - `make`
 - `g++`, `clang++`, or any other C++ compiler that supports `C++17`
-  > [!NOTE]
-  > By default it will compile with `g++`, so if you decide to not use `g++`, please assign the compiler of your choice when using make.
+> [!NOTE]
+> By default it will compile with `g++`, so if you decide to not use `g++`, please assign the compiler of your choice when using make.
 
 ### Building
 
