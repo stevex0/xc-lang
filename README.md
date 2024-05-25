@@ -24,7 +24,7 @@ make COMPILER="g++"
 ```
 
 > [!TIP]
-> The `COMPILER` variable can be omitted if you want to compile the project with `g++`. If you decide to use another C++ compiler, replace `g++` with your desired c++ compiler.
+> The `COMPILER` variable can be omitted if you want to compile the project with `g++`. If you decide to use another C++ compiler, replace `g++` with your desired C++ compiler.
 
 > [!CAUTION]
 > Any C++ compiler other than `g++` has not been tested.
